@@ -1,0 +1,25 @@
+\babel@toc {polish}{}\relax 
+\contentsline {section}{\numberline {1}Wstęp teoretyczny}{3}{section.1}%
+\contentsline {subsection}{\numberline {1.1}Opis problemu}{3}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.2}Algorytm genetyczny}{3}{subsection.1.2}%
+\contentsline {subsubsection}{\numberline {1.2.1}Elementy algorytmu}{3}{subsubsection.1.2.1}%
+\contentsline {subsubsection}{\numberline {1.2.2}Selekcja turniejowa}{3}{subsubsection.1.2.2}%
+\contentsline {subsubsection}{\numberline {1.2.3}Krzyżowanie OX (Order Crossover)}{4}{subsubsection.1.2.3}%
+\contentsline {subsubsection}{\numberline {1.2.4}Metody mutacji}{4}{subsubsection.1.2.4}%
+\contentsline {paragraph}{Mutacja Swap}{4}{section*.5}%
+\contentsline {paragraph}{Mutacja Invert (odwrócenie segmentu)}{4}{section*.6}%
+\contentsline {subsubsection}{\numberline {1.2.5}Pseudokod}{4}{subsubsection.1.2.5}%
+\contentsline {subsubsection}{\numberline {1.2.6}Złożoność obliczeniowa}{5}{subsubsection.1.2.6}%
+\contentsline {section}{\numberline {2}Plan eksperymentu}{5}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Cel badań}{5}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Instancje testowe}{6}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Parametry algorytmu}{6}{subsection.2.3}%
+\contentsline {subsection}{\numberline {2.4}Metodologia}{6}{subsection.2.4}%
+\contentsline {subsection}{\numberline {2.5}Wykorzystany sprzęt}{7}{subsection.2.5}%
+\contentsline {section}{\numberline {3}Wyniki eksperymentów}{7}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Zależność błędu od rozmiaru instancji}{7}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Zależność czasu uzyskania wyniku od rozmiaru instancji}{9}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Wpływ rozmiaru populacji na czas i błąd}{10}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}Wpływ metody mutacji na czas i błąd (4.0)}{12}{subsection.3.4}%
+\contentsline {section}{\numberline {4}Wnioski}{15}{section.4}%
+\contentsline {section}{\numberline {5}Literatura}{16}{section.5}%

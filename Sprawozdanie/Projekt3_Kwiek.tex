@@ -1,0 +1,393 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage{graphicx}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[polish]{babel}
+\usepackage{changepage}
+\usepackage[a4paper, margin=1in]{geometry}
+\usepackage{multicol}
+\usepackage{amsmath}
+\usepackage{gensymb}
+\usepackage{graphicx}
+\usepackage{multirow}
+\usepackage{enumerate}
+\usepackage[shortlabels]{enumitem}
+\usepackage{array}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usepackage{verbatim}
+\usepackage{tabularx}
+\usepackage{caption}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{lipsum}
+\usepackage{etoolbox}
+\usepackage[export]{adjustbox}
+\renewcommand{\labelenumii}{\arabic{enumi}.\arabic{enumii}}
+\renewcommand{\labelenumiii}{\arabic{enumi}.\arabic{enumii}.\arabic{enumiii}}
+\renewcommand{\labelenumiv}{\arabic{enumi}.\arabic{enumii}.\arabic{enumiii}.\arabic{enumiv}}
+\begin{document}
+
+
+\begin{multicols}{3}
+    \begin{figure}[H]
+        \includegraphics[scale=0.4]{DOJEBANE_LOGO_PWR.png}
+        \label{fig:enter-label}
+    \end{figure}
+    \hspace{80pt}
+    \begin{figure}[H]
+    \end{figure}
+    \begin{flushright}
+    \begin{figure}[H]
+        \includegraphics[scale=0.37]{w4n.png}
+        \centering
+        \caption*{\textbf{W4N}}
+        \label{fig:WYDZIAŁ INFORMATYKI I TELEKOMUNIKACJI}
+    \end{figure}
+    \end{flushright}
+\end{multicols}
+
+\vspace{75pt}
+
+\begin{center}
+    \textbf{\Large{Projektowanie efektywnych algorytmów - projekt nr 3}} 
+    \vspace{2pt}
+    \hrule
+    \vspace{4pt}
+    \textbf{\Large{Implementacja i analiza efektywności algorytmu Symulowanego Wyżarzania dla asymetrycznego problemu komiwojażera (ATSP)}} 
+\end{center}
+
+\vspace{75pt}
+\begin{center}
+    \Large{
+    \textbf{Autor: } \\
+    Filip Kwiek 280947 \\
+    }
+\end{center}
+\newpage
+\tableofcontents
+
+\section{Wstęp teoretyczny}
+
+Projekt dotyczy implementacji i analizy efektywności algorytmu Symulowanego Wyżarzania (ang. Simulated Annealing, SA) 
+dla asymetrycznego problemu komiwojażera (ATSP). Algorytm SA należy do klasy metaheurystyk inspirowanych procesami fizycznymi
+- w tym przypadku procesem wyżarzania metali, w którym materiał jest podgrzewany do wysokiej temperatury, a następnie powoli schładzany,
+co pozwala atomom na osiągnięcie stanu o niskiej energii.
+
+\subsection{Opis problemu}
+
+Asymetryczny problem komiwojażera (ATSP) polega na znalezieniu najkrótszej trasy odwiedzającej każde miasto dokładnie raz
+i wracającej do punktu startowego, przy czym koszt przejścia z miasta $i$ do miasta $j$ może być różny od kosztu przejścia z $j$ do $i$.
+Problem ten jest NP-trudny, co oznacza, że nie istnieje znany algorytm wielomianowy gwarantujący znalezienie rozwiązania optymalnego
+w rozsądnym czasie dla dużych instancji.
+
+\subsection{Algorytm Symulowanego Wyżarzania}
+
+Symulowane Wyżarzanie jest algorytmem przeszukiwania lokalnego z mechanizmem ucieczki z minimów lokalnych.
+W odróżnieniu od klasycznego przeszukiwania lokalnego, SA akceptuje również rozwiązania gorsze od bieżącego
+z pewnym prawdopodobieństwem zależnym od temperatury i wielkości pogorszenia.
+
+\subsubsection{Elementy algorytmu}
+
+\begin{itemize}
+    \item \textbf{Rozwiązanie początkowe} - punkt startowy przeszukiwania. Może być generowane losowo lub za pomocą heurystyki (np. Nearest Neighbour).
+    \item \textbf{Sąsiedztwo} - zbiór rozwiązań osiągalnych z bieżącego rozwiązania przez pojedynczą modyfikację. W implementacji zastosowano zamianę dwóch losowych miast w ścieżce.
+    \item \textbf{Temperatura} - parametr kontrolujący prawdopodobieństwo akceptacji gorszych rozwiązań. Wysoka temperatura oznacza większą eksplorację, niska - eksploatację.
+    \item \textbf{Schemat chłodzenia} - funkcja opisująca jak temperatura maleje w czasie. Zastosowano schemat geometryczny: $T_{k+1} = \alpha \cdot T_k$, gdzie $\alpha \in (0, 1)$.
+    \item \textbf{Kryterium akceptacji} - rozwiązanie lepsze jest zawsze akceptowane. Rozwiązanie gorsze o $\Delta$ jest akceptowane z prawdopodobieństwem $P = e^{-\Delta / T}$.
+    \item \textbf{Epoka} - liczba iteracji wykonywanych na jednym poziomie temperatury przed schłodzeniem.
+    \item \textbf{Kryterium stopu} - limit czasu działania algorytmu.
+\end{itemize}
+
+\subsubsection{Pseudokod}
+
+\begin{verbatim}
+Funkcja SimulatedAnnealing(MacierzKosztow, N, Config):
+    S = GenerujRozwiazaniePoczatkowe(N, Config.typ_poczatkowy)
+    KosztS = ObliczKoszt(S)
+    Najlepsze = S
+    NajlepszyKoszt = KosztS
+    T = Config.temperatura_poczatkowa
+    
+    Dopóki (T > T_min ORAZ czas < limit):
+        Wykonaj Config.dlugosc_epoki razy:
+            i, j = LosoweIndeksy(1, N-1)
+            Delta = ObliczDeltaSwap(S, i, j)
+            
+            Jeśli Delta < 0:
+                WykonajSwap(S, i, j)
+                KosztS += Delta
+            W przeciwnym razie:
+                P = exp(-Delta / T)
+                Jeśli Random(0,1) < P:
+                    WykonajSwap(S, i, j)
+                    KosztS += Delta
+                    
+            Jeśli KosztS < NajlepszyKoszt:
+                NajlepszyKoszt = KosztS
+                Najlepsze = S
+                
+        T = T * alpha  // chlodzenie geometryczne
+        
+    Zwróć NajlepszyKoszt, Najlepsze
+\end{verbatim}
+
+\subsubsection{Złożoność obliczeniowa}
+
+Złożoność jednej iteracji algorytmu SA wynosi $O(1)$ dzięki obliczaniu delty kosztu zamiast przeliczania całej ścieżki.
+Całkowita złożoność zależy od liczby iteracji, która jest kontrolowana przez limit czasu i parametry chłodzenia.
+Dla schematu geometrycznego liczba poziomów temperatury wynosi $\frac{\ln(T_{min}/T_0)}{\ln(\alpha)}$.
+
+\textbf{Zalety}:
+\begin{itemize}
+    \item Zdolność do ucieczki z minimów lokalnych
+    \item Prostota implementacji
+    \item Dobre wyniki dla wielu problemów kombinatorycznych
+    \item Możliwość kontroli jakości rozwiązania przez parametry
+\end{itemize}
+
+\textbf{Wady}:
+\begin{itemize}
+    \item Nie gwarantuje znalezienia rozwiązania optymalnego
+    \item Wrażliwość na dobór parametrów (temperatura, chłodzenie, epoka)
+    \item Czas działania może być długi dla dużych instancji
+\end{itemize}
+
+\section{Plan eksperymentu}
+
+\subsection{Cel badań}
+
+Celem eksperymentów jest wyznaczenie:
+\begin{enumerate}
+    \item Zależności czasu uzyskania najlepszego wyniku od rozmiaru instancji (przy limicie 1 minuty).
+    \item Zależności błędu względnego od rozmiaru instancji.
+    \item Wpływu rozwiązania początkowego (losowe vs Nearest Neighbour) na czas i błąd.
+\end{enumerate}
+
+\subsection{Instancje testowe}
+
+Do badań wykorzystano instancje z biblioteki TSPLIB/ATSP o zróżnicowanych rozmiarach:
+
+\begin{table}[H]
+\centering
+\caption{Instancje testowe}
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Instancja} & \textbf{N} & \textbf{OPT} \\
+\hline
+br17 & 17 & 39 \\
+ftv33 & 34 & 1286 \\
+ftv35 & 36 & 1473 \\
+ftv38 & 39 & 1530 \\
+p43 & 43 & 5620 \\
+ftv44 & 45 & 1613 \\
+ftv47 & 48 & 1776 \\
+ry48p & 48 & 14422 \\
+ft53 & 53 & 6905 \\
+ftv55 & 56 & 1608 \\
+ftv64 & 65 & 1839 \\
+ft70 & 70 & 38673 \\
+ftv70 & 71 & 1950 \\
+ftv170 & 171 & 2755 \\
+rbg323 & 323 & 1326 \\
+rbg358 & 358 & 1163 \\
+rbg403 & 403 & 2465 \\
+rbg443 & 443 & 2720 \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Parametry algorytmu}
+
+\begin{table}[H]
+\centering
+\caption{Domyślne parametry SA}
+\begin{tabular}{|l|c|}
+\hline
+\textbf{Parametr} & \textbf{Wartość} \\
+\hline
+Temperatura początkowa ($T_0$) & 10000 \\
+Współczynnik chłodzenia ($\alpha$) & 0.999 \\
+Długość epoki & 100 \\
+Temperatura minimalna ($T_{min}$) & 0.01 \\
+Limit czasu & 15min \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Metodologia}
+
+\begin{itemize}
+    \item Każda konfiguracja została uruchomiona 10 razy dla każdej instancji.
+    \item Mierzono średni błąd względny, średni czas znalezienia najlepszego rozwiązania oraz najlepszy znaleziony wynik.
+    \item Błąd względny obliczano wzorem: $B = \frac{C_{found} - C_{opt}}{C_{opt}} \cdot 100\%$
+\end{itemize}
+
+\subsection{Wykorzystany sprzęt}
+
+\begin{itemize}
+    \item Procesor: AMD Ryzen 7 5700X3D 4.15GHz
+    \item Pamięć RAM: 48GB DDR4 2800MHz
+    \item System operacyjny: EndeavourOS (Arch Linux)
+    \item Kompilator: GCC 16.1.1, optymalizacja -O3
+\end{itemize}
+
+\section{Wyniki eksperymentów}
+
+\subsection{Zależność błędu od rozmiaru instancji}
+
+\begin{table}[H]
+\centering
+\caption{Średni błąd względny SA w zależności od instancji (rozwiązanie początkowe: Random)}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+\textbf{Instancja} & \textbf{N} & \textbf{OPT} & \textbf{Śr. znalezione} & \textbf{Błąd [\%]} \\
+\hline
+br17 & 17 & 39 & 39 & 0.00 \\
+ftv33 & 34 & 1286 & 1286 & 0.00 \\
+ftv35 & 36 & 1473 & 1475 & 0.14 \\
+ftv38 & 39 & 1530 & 1534 & 0.26 \\
+p43 & 43 & 5620 & 5620 & 0.00 \\
+ftv44 & 45 & 1613 & 1670 & 3.53 \\
+ftv47 & 48 & 1776 & 1837 & 3.43 \\
+ry48p & 48 & 14422 & 14446 & 0.17 \\
+ft53 & 53 & 6905 & 7213 & 4.46 \\
+ftv55 & 56 & 1608 & 1678 & 4.35 \\
+ftv64 & 65 & 1839 & 1993 & 8.37 \\
+ft70 & 70 & 38673 & 40190 & 3.92 \\
+ftv70 & 71 & 1950 & 2167 & 11.13 \\
+ftv170 & 171 & 2755 & 4172 & 51.43 \\
+rbg323 & 323 & 1326 & 1467 & 10.63 \\
+rbg358 & 358 & 1163 & 1326 & 14.02 \\
+rbg403 & 403 & 2465 & 2543 & 3.16 \\
+rbg443 & 443 & 2720 & 2830 & 4.04 \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{wykres_blad_vs_N.png}
+    \caption{Średni błąd względny SA w zależności od rozmiaru instancji}
+\end{figure}
+
+Dla większości badanych instancji błąd względny nie przekroczył 30\%.
+Wyjątkiem jest instancja ftv170 (N=171), dla której błąd wyniósł 51.43\% - wynika to z niewystarczającego czasu
+działania (60s) dla tej instancji przy zastosowanych parametrach. Zwiększenie limitu czasu lub dostrojenie parametrów pozwoliłoby zmniejszyć ten błąd.
+Dla instancji rbg (N=323-443) algorytm radzi sobie dobrze (3-14\%), co sugeruje, że struktura tych grafów jest korzystna dla SA.
+
+\subsection{Zależność czasu uzyskania wyniku od rozmiaru instancji}
+
+\begin{table}[H]
+\centering
+\caption{Średni czas znalezienia najlepszego rozwiązania [ms]}
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Instancja} & \textbf{N} & \textbf{Czas Random [ms]} & \textbf{Czas NN [ms]} \\
+\hline
+br17 & 17 & 21.4 & 15.3 \\
+ftv33 & 34 & 631.0 & 17225.2 \\
+ftv35 & 36 & 24778.0 & 40754.6 \\
+ftv38 & 39 & 49688.9 & 41476.7 \\
+p43 & 43 & 46765.0 & 16485.5 \\
+ftv44 & 45 & 37207.1 & 12055.2 \\
+ftv47 & 48 & 8328.3 & 22374.1 \\
+ry48p & 48 & 48266.8 & 12251.8 \\
+ft53 & 53 & 36181.4 & 32744.6 \\
+ftv55 & 56 & 884.3 & 8183.2 \\
+ftv64 & 65 & 13099.0 & 40079.6 \\
+ft70 & 70 & 38911.7 & 861.1 \\
+ftv70 & 71 & 38085.2 & 33031.1 \\
+ftv170 & 171 & 10641.2 & 0.0 \\
+rbg323 & 323 & 54225.8 & 8299.9 \\
+rbg358 & 358 & 21845.9 & 39838.8 \\
+rbg403 & 403 & 1814.3 & 6052.9 \\
+rbg443 & 443 & 48951.2 & 9121.6 \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{wykres_czas_vs_N.png}
+    \caption{Czas uzyskania najlepszego wyniku SA w zależności od rozmiaru instancji}
+\end{figure}
+
+Czas znalezienia najlepszego rozwiązania jest rozłożony w całym przedziale limitu (0-60s) i nie wykazuje
+prostej zależności liniowej od N. Wynika to z losowej natury algorytmu - najlepsze rozwiązanie może zostać
+znalezione zarówno na początku, jak i pod koniec działania. Dla ftv170 z NN czas wynosi 0ms, co oznacza że
+rozwiązanie początkowe NN było jednocześnie najlepszym znalezionym (algorytm nie poprawił go w trakcie działania).
+
+\subsection{Wpływ rozwiązania początkowego}
+
+\begin{table}[H]
+\centering
+\caption{Porównanie rozwiązania początkowego: Random vs Nearest Neighbour}
+\begin{tabular}{|l|c|c|c|c|c|}
+\hline
+\textbf{Instancja} & \textbf{N} & \textbf{Błąd Random [\%]} & \textbf{Błąd NN [\%]} & \textbf{Best Random} & \textbf{Best NN} \\
+\hline
+br17 & 17 & 0.00 & 0.00 & 39 & 39 \\
+ftv33 & 34 & 0.00 & 0.93 & 1286 & 1298 \\
+ftv35 & 36 & 0.14 & 0.14 & 1475 & 1475 \\
+ftv38 & 39 & 0.26 & 0.26 & 1534 & 1534 \\
+p43 & 43 & 0.00 & 0.00 & 5620 & 5620 \\
+ftv44 & 45 & 3.53 & 2.85 & 1670 & 1659 \\
+ftv47 & 48 & 3.43 & 4.84 & 1837 & 1862 \\
+ry48p & 48 & 0.17 & 0.21 & 14446 & 14453 \\
+ft53 & 53 & 4.46 & 3.64 & 7213 & 7156 \\
+ftv55 & 56 & 4.35 & 4.98 & 1678 & 1688 \\
+ftv64 & 65 & 8.37 & 9.30 & 1993 & 2010 \\
+ft70 & 70 & 3.92 & 3.27 & 40190 & 39938 \\
+ftv70 & 71 & 11.13 & 10.87 & 2167 & 2162 \\
+ftv170 & 171 & 51.43 & 42.40 & 4172 & 3923 \\
+rbg323 & 323 & 10.63 & 10.18 & 1476 & 1467 \\
+rbg358 & 358 & 14.02 & 16.68 & 1326 & 1357 \\
+rbg403 & 403 & 3.16 & 2.68 & 2543 & 2531 \\
+rbg443 & 443 & 4.04 & 4.26 & 2830 & 2836 \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{wykres_rozw_poczatkowe.png}
+    \caption{Porównanie błędu SA dla rozwiązania początkowego losowego i NN}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{wykres_rozw_poczatkowe_czas.png}
+    \caption{Porównanie czasu znalezienia najlepszego dla rozwiązania początkowego losowego i NN}
+\end{figure}
+
+\section{Wnioski}
+
+\begin{enumerate}
+    \item Algorytm SA dla większości badanych instancji (16 z 18) osiąga błąd poniżej 15\%. Wyjątkiem jest instancja ftv170 (N=171), dla której błąd wyniósł 51.43\% (Random) i 42.40\% (NN) - wynika to z niewystarczającego czasu działania (60s) przy zastosowanych parametrach dla tej konkretnej struktury grafu.
+    
+    \item Dla małych instancji (N $\leq$ 48) algorytm często znajduje rozwiązanie optymalne lub bliskie optimum (błąd < 5\%). Dotyczy to instancji br17, ftv33, ftv35, ftv38, p43, ry48p.
+    
+    \item Wpływ rozwiązania początkowego nie jest jednoznaczny:
+    \begin{itemize}
+        \item Dla ftv170 start z NN daje wyraźnie lepszy wynik (42.40\% vs 51.43\%), ponieważ NN dostarcza lepszy punkt startowy dla dużej instancji.
+        \item Dla mniejszych instancji różnice są minimalne - SA z dostatecznym czasem jest w stanie uciec z lokalnego minimum niezależnie od startu.
+        \item Dla rbg358 start losowy daje lepszy wynik (14.02\% vs 16.68\%), co sugeruje że NN może prowadzić do gorszego minimum lokalnego.
+    \end{itemize}
+    
+    \item Czas znalezienia najlepszego rozwiązania nie wykazuje prostej korelacji z rozmiarem instancji. Wynika to z losowej natury algorytmu i restartu temperatury - najlepsze rozwiązanie może zostać znalezione w dowolnym momencie działania.
+    
+    \item Instancje rbg (N=323-443) mimo dużego rozmiaru mają niski błąd (3-14\%), co sugeruje że ich struktura (rzadki graf z małymi wagami) jest korzystna dla operacji swap w SA.
+\end{enumerate}
+
+\section{Literatura}
+
+\begin{enumerate}
+    \item Z. Michalewicz, D.B. Fogel, \textit{Jak to rozwiązać, czyli nowoczesna heurystyka}, WNT, 2006.
+    \item S. Kirkpatrick, C.D. Gelatt, M.P. Vecchi, \textit{Optimization by Simulated Annealing}, Science, 220(4598), 1983.
+    \item V. Černý, \textit{Thermodynamical approach to the traveling salesman problem}, Journal of Optimization Theory and Applications, 45(1), 1985.
+    \item TSPLIB - biblioteka instancji testowych TSP/ATSP, \url{http://comopt.ifi.uni-heidelberg.de/software/TSPLIB95/}
+\end{enumerate}
+
+\end{document}
